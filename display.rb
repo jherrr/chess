@@ -18,7 +18,7 @@ class Display
   def build_row(row, i)
     row.map.with_index do |square, j|
       color_options = colors_for(i, j)
-      space = '   ' if square.nil?
+      space = '    ' if square.nil?
       space = square.to_s unless square.nil?
       space.colorize(color_options)
     end
@@ -28,15 +28,15 @@ class Display
     if [i, j] == @cursor_pos
       bg = :light_red
     elsif (i + j).odd?
-      bg = :light_blue
-    else
       bg = :blue
+    else
+      bg = :light_blue
     end
-    { background: bg, color: :white }
+    { background: bg} # color: :red }
   end
 
   def render
-    system("clear")
+    system "clear"
     puts "Fill the grid!"
     puts "Arrow keys, WASD, or vim to move, space or enter to confirm."
     build_grid.each { |row| puts row.join }

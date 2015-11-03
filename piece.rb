@@ -9,13 +9,22 @@ class Piece
     @board = board
   end
 
-  def move_dirs
-    MOVE_DIRECTIONS
-  end
-
-
   def valid_moves
-    temp_board = @board.dup
+    # debugger
+    available_moves = []
+    self.moves.each do |move|
+      temp_board = @board.dup
+      # p @board[@pos].class
+      # puts "this is the temp:"
+      # p temp_board[@pos].class
+      temp_board.move!(@pos, move)
+      # p "can you see me?"
+      unless temp_board.in_check?(@color)
+        available_moves << move
+      end
+    end
+
+    available_moves
   end
 
 end

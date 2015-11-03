@@ -13,11 +13,15 @@ class Knight < SteppingPieces
   ]
 
   def to_s
-    ' H '
+    ' ♘  '.colorize(@color)
   end
 
   def move_dirs
     MOVE_DIRECTIONS
+  end
+
+  def dup
+    Knight.new(@pos, @color, nil)
   end
 end
 
@@ -34,11 +38,15 @@ class King < SteppingPieces
     [ 0, -1]
   ]
 
-    def to_s
-      ' K '
-    end
+  def to_s
+    ' ♔  '.colorize(@color)
+  end
 
-    def move_dirs
-      MOVE_DIRECTIONS
-    end
+  def move_dirs
+    MOVE_DIRECTIONS
+  end
+
+  def dup
+    King.new(@pos, @color, nil)
+  end
 end

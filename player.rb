@@ -1,8 +1,10 @@
 require_relative "display"
 
 class Player
-  def initialize(board)
+  attr_reader :name, :color
+  def initialize(board, name, color)
     @display = Display.new(board)
+    @name, @color = name, color
   end
 
   def move

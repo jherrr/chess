@@ -1,8 +1,11 @@
 require 'byebug'
 require_relative 'stepping_subclasses'
 require_relative 'sliding_subclasses'
+require_relative 'pawn'
 
 class Board
+
+  attr_accessor :board
   def initialize
     @board = Array.new(8) {Array.new(8) {nil} }
     setup_board
@@ -19,7 +22,30 @@ class Board
   end
 
   def setup_board
-    self[[0, 0]] = Rook.new([0, 0], :white, self)
+    @board[0] = [
+      Rook.new([0,0], :red, self),
+      Knight.new([0,1], :red, self),
+      Bishop.new([0,2], :red, self),
+      Queen.new([0,3], :red, self),
+      King.new([0,4], :red, self),
+      Bishop.new([0,5], :red, self),
+      Knight.new([0,6], :red, self),
+      Rook.new([0,7], :red, self)
+    ]
+    @board[1].map!.with_index {|_, i| Pawn.new([1, i], :red, self)}
+    #self[[0, 0]] = Pawn.new([0, 0], :white, self, 1)
+
+    @board[6].map!.with_index {|_, i| Pawn.new([6, i], :white, self)}
+    @board[7] = [
+      Rook.new([7,0], :white, self),
+      Knight.new([7,1], :white, self),
+      Bishop.new([7,2], :white, self),
+      Queen.new([7,3], :white, self),
+      King.new([7,4], :white, self),
+      Bishop.new([7,5], :white, self),
+      Knight.new([7,6], :white, self),
+      Rook.new([7,7], :white, self)
+    ]
     # @board
   end
 
@@ -29,18 +55,25 @@ class Board
 
 
   def move(start, end_pos)
-    debugger
-    raise "no piece" if self[start].nil?
-    raise "invalid move" unless self[start].moves.include?(end_pos)
-    # rescue
-    # end
+    #debugger
+    # p self[start].class
+    raise NoPieceError, "no piece" if self[start].nil?
+    raise InvalidMoveError, "invalid move" unless self[start].valid_moves.include?(end_pos)
+    raise InvalidMoveError, "Can't move into check" if self.in_check?(se)
 
     self[end_pos] = self[start]
     self[start].pos = end_pos
     self[start] = nil
   end
 
+  def move!(start, end_pos)
+    self[end_pos] = self[start]
+    self[start].pos = end_pos
+    self[start] = nil
+  end
+
   def in_check?(color)
+
     pos = find_king(color)
 
     @board.each_with_index do |row, x|
@@ -56,31 +89,57 @@ class Board
   end
 
   def checkmate?(color)
-    pos = find_king(color)
+    return false unless in_check?(color)
+    # debugger
 
-    return true if self[pos].moves.empty? && in_check?(color)
+    @board.each do |row|
+      row.each do |square|
+        unless square.nil?
+          if square.color == color
+            return false unless square.valid_moves.empty?
+          end
+        end
+      end
+    end
 
-    false
+    true
   end
 
   def find_king(color)
+    #debugger
     @board.each_with_index do |row, x|
       row.each_with_index do |square, y|
-        return [x, y] if square.class == King
+        if square.class == King
+          return [x, y] if square.color == color
+        end
       end
     end
   end
 
   def dup
-    temp_board = @board.deep_dup
-    #set dup board pieces to temp_board
-    temp_board.each_with_index do |row, x|
-      row.each_with_index do |square, y|
-        square.board = temp_board if square.class == Piece
+    copy = Board.new
+    self.dup_of_pieces(copy)
+    # temp_display = Display.new(copy)
+    # temp_display.render
+    copy
+  end
+
+  def dup_of_pieces(copy_board)
+    # debugger
+    self.board.each_with_index do |row, i|
+      row.each_with_index do |square, j|
+        # debugg er
+        unless square.nil?
+          copy_piece = square.dup
+
+          copy_board[copy_piece.pos] = copy_piece
+          copy_piece.board = copy_board
+        else
+          copy_board[[i,j]] = nil
+        end
       end
     end
-
-    temp_board
+    copy_board
   end
 
   def rows
@@ -88,16 +147,9 @@ class Board
   end
 end
 
-class Array
-  def deep_dup
-    new_array = []
-    self.each do |el|
-      unless el.nil?
-        new_array << (el.is_a?(Array) ? el.deep_dup : el.class.new(pos,color, nil))
-      else
-        new_array << nil
-      end
-    end
-    new_array
-  end
+
+class InvalidMoveError < StandardError
+end
+
+class NoPieceError < StandardError
 end
