@@ -59,7 +59,7 @@ class Board
     # p self[start].class
     raise NoPieceError, "no piece" if self[start].nil?
     raise InvalidMoveError, "invalid move" unless self[start].valid_moves.include?(end_pos)
-    raise InvalidMoveError, "Can't move into check" if self.in_check?(se)
+    raise InvalidMoveError, "Can't move into check" if self.in_check?(self[start].color)
 
     self[end_pos] = self[start]
     self[start].pos = end_pos
@@ -107,11 +107,10 @@ class Board
 
   def find_king(color)
     #debugger
-    @board.each_with_index do |row, x|
-      row.each_with_index do |square, y|
-        if square.class == King
-          return [x, y] if square.color == color
-        end
+    flattened_board = @board.flatten
+    flattened_board.each do |square|
+      if square.class == King
+        return square.pos if square.color == color
       end
     end
   end
