@@ -31,23 +31,19 @@ class Pawn < Piece
   end
 
   def move_valid?(current_pos)
-    x, y = current_pos
-    return false unless x.between?(0,7)
-    return false unless y.between?(0,7)
+    return false unless @board.in_bounds?(current_pos)
     square_contents = @board[current_pos]
-    return true if square_contents.nil?
-    return false if square_contents.color != color
-
-    true
+    return square_contents.nil?
   end
 
   def attack_valid?(current_pos)
-    x, y = current_pos
-    return false unless x.between?(0,7)
-    return false unless y.between?(0,7)
-    square_contents = @board[current_pos]
-    return false if square_contents.nil?
-    return true unless square_contents.color == color
+    if @board.in_bounds?(current_pos)
+      square_contents = @board[current_pos]
+      if !square_contents.nil? && square_contents.color != color
+        return true
+      end
+    end
+    false
   end
 
   def to_s

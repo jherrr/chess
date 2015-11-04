@@ -17,7 +17,8 @@ class Game
     until @board.checkmate?(:white) || @board.checkmate?(:red)
       begin
         current_player = @players.first
-        puts "#{current_player.name} (#{current_player.color} player's) turn"
+        current_player.display.render
+        puts "#{current_player.color.capitalize} player's turn"
         puts "Select a piece"
         start = current_player.move
         raise NoPieceError, 'empty space' if @board[start].nil?
@@ -40,10 +41,21 @@ class Game
         retry
       end
 
+      check_promotion
+
       @players.rotate!
     end
 
     puts "#{@players.last.color.capitalize} wins!"
+  end
+
+  def check_promotion
+    end_rows = @board.rows[0] + @board.rows[7]
+    end_rows.each do |square|
+      if square.class == Pawn
+        @board[square.pos] = Queen.new(square.pos, square.color, @board)
+      end
+    end
   end
 end
 

@@ -21,6 +21,11 @@ class Board
     @board[x][y]
   end
 
+  def in_bounds?(position)
+    x, y = position
+    x.between?(0, 7) && y.between?(0, 7)
+  end
+
   def setup_board
     @board[0] = [
       Rook.new([0,0], :red, self),
